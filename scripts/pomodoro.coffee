@@ -9,6 +9,8 @@
 #
 # Commands
 #   hubot start pomodoro - start a new pomodoro
+#   hubot stop pomodoro - stop the current pomodoro
+#   hubot pomodoro? - get the pomodoro current status
 #
 # Author:
 #   MarioAraque
@@ -39,14 +41,21 @@ module.exports = (robot) ->
       return
 
     if not pomodoroBreak
-      msg.send "There are still #{(pomodoroLength - pomodoroCurrentLength)} in this Pomodoro."
+      msg.send "There are still #{(pomodoroLength - pomodoroCurrentLength)} minutes in this Pomodoro."
       return
 
     if breakTime == defaultBreak
-      msg.send "There are still #{breakTime - pomodoroBreakCurrentLength} of short break."
+      msg.send "There are still #{breakTime - pomodoroBreakCurrentLength} minutes of short break."
 
     if breakTime == longBreak
-      msg.send "There are still #{breakTime - pomodoroBreakCurrentLength} of long break."
+      msg.send "There are still #{breakTime - pomodoroBreakCurrentLength} minutes of long break."
+
+  robot.respond /stop pomodoro/i, (msg) ->
+    if not pomodoroStarted
+      msg.send "The team are not in Pomodoro."
+      return
+
+    stopPomodoro msg
 
 startPomodoro = (msg) ->
   pomodoroStarted = true
@@ -62,14 +71,13 @@ checkPomodoroCurrentLength = (msg) ->
     pomodoroCurrentLength++
 
     if pomodoroCurrentLength == pomodoroLength - 5
-      msg.send "5 minutes to break."
+      msg.send "Only 5 minutes to break."
 
     if pomodoroCurrentLength == pomodoroLength
       pomodoroCount++
       msg.send "Pomodoro Completed!"
       startBreak msg
   ), 60 * 1000
-
 
 startBreak = (msg) ->
   breakTime = defaultBreak
@@ -87,3 +95,11 @@ startBreak = (msg) ->
       msg.send "Break finished."
       startPomodoro msg
   ), 60 * 1000
+
+stopPomodoro = (msg) ->
+  pomodoroStarted = null
+  pomodoroBreak = false
+  clearInterval pomodoroInterval
+  pomodoroCurrentLength = 0
+
+  msg.send "Pomodoro stopped."
