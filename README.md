@@ -1,0 +1,3 @@
+# Lola
+
+Our awesome Bot
