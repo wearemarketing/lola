@@ -18,9 +18,12 @@ longBreak = 15
 pomodoroLength = 25
 pomodoroStarted = null
 pomodoroCurrentLength = 0
+pomodoroBreakCurrentLength = 0
 pomodoroCount = 0;
 pomodoroInterval = null
 pomodoroCountToBreak = 4
+pomodoroBreak = false
+breakTime = 0
 
 module.exports = (robot) ->
   robot.respond /start pomodoro/i, (msg) ->
@@ -30,8 +33,24 @@ module.exports = (robot) ->
 
     startPomodoro msg
 
+  robot.respond /pomodoro?/i, (msg) ->
+    if not pomodoroStarted
+      msg.send "The team are not in Pomodoro."
+      return
+
+    if not pomodoroBreak
+      msg.send "There are still #{(pomodoroLength - pomodoroCurrentLength)} in this Pomodoro."
+      return
+
+    if breakTime == defaultBreak
+      msg.send "There are still #{breakTime - pomodoroBreakCurrentLength} of short break."
+
+    if breakTime == longBreak
+      msg.send "There are still #{breakTime - pomodoroBreakCurrentLength} of long break."
+
 startPomodoro = (msg) ->
   pomodoroStarted = true
+  pomodoroBreak = false
   pomodoroCurrentLength = 0
   clearInterval pomodoroInterval
 
@@ -55,13 +74,16 @@ checkPomodoroCurrentLength = (msg) ->
 startBreak = (msg) ->
   breakTime = defaultBreak
   breakTimeMsg = 'Short break started.'
+  pomodoroBreak = true
 
   if pomodoroCount % pomodoroCountToBreak == 0
     breakTime = longBreak
     breakTimeMsg = 'Long break started.'
 
   msg.send breakTimeMsg
-  setTimeout ( ->
-    msg.send "Break finished."
-    startPomodoro msg
-  ), breakTime * 60 * 1000
+  pomodoroInterval = setInterval ( ->
+    pomodoroBreakCurrentLength++
+    if pomodoroBreakCurrentLength == breakTime
+      msg.send "Break finished."
+      startPomodoro msg
+  ), 60 * 1000
