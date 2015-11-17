@@ -61,12 +61,12 @@ startPomodoro = (msg) ->
   pomodoroStarted = true
   pomodoroBreak = false
   pomodoroCurrentLength = 0
-  clearInterval pomodoroInterval
 
   msg.send "Pomodoro started."
   checkPomodoroCurrentLength msg
 
 checkPomodoroCurrentLength = (msg) ->
+  clearInterval pomodoroInterval
   pomodoroInterval = setInterval (->
     pomodoroCurrentLength++
 
@@ -83,6 +83,7 @@ startBreak = (msg) ->
   breakTime = defaultBreak
   breakTimeMsg = 'Short break started.'
   pomodoroBreak = true
+  clearInterval pomodoroInterval
 
   if pomodoroCount % pomodoroCountToBreak == 0
     breakTime = longBreak
@@ -101,5 +102,6 @@ stopPomodoro = (msg) ->
   pomodoroBreak = false
   clearInterval pomodoroInterval
   pomodoroCurrentLength = 0
+  pomodoroCount = 0
 
   msg.send "Pomodoro stopped."
