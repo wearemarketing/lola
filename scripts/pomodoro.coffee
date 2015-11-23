@@ -21,7 +21,7 @@ pomodoroLength = 25
 pomodoroStarted = null
 pomodoroCurrentLength = 0
 pomodoroBreakCurrentLength = 0
-pomodoroCount = 0;
+pomodoroCount = 0
 pomodoroInterval = null
 pomodoroCountToBreak = 4
 pomodoroBreak = false
@@ -57,6 +57,12 @@ module.exports = (robot) ->
 
     stopPomodoro msg
 
+  robot.respond /start (short|long) break/i, (msg) ->
+    pomodoroStarted = true
+    pomodoroBreakCurrentLength = 0
+    pomodoroCount = 0
+    startBreak msg, msg.match[1]
+
 startPomodoro = (msg) ->
   pomodoroStarted = true
   pomodoroBreak = false
@@ -79,13 +85,15 @@ checkPomodoroCurrentLength = (msg) ->
       startBreak msg
   ), 60 * 1000
 
-startBreak = (msg) ->
-  breakTime = defaultBreak
-  breakTimeMsg = 'Short break started.'
+startBreak = (msg, type = '') ->
   pomodoroBreak = true
   clearInterval pomodoroInterval
 
-  if pomodoroCount % pomodoroCountToBreak == 0
+  if(type == '' or type == 'short')
+    breakTime = defaultBreak
+    breakTimeMsg = 'Short break started.'
+
+  if (pomodoroCount % pomodoroCountToBreak == 0 and type == '') or (type == 'long')
     breakTime = longBreak
     breakTimeMsg = 'Long break started.'
 
